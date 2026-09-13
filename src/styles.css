@@ -1,0 +1,180 @@
+:root {
+  color-scheme: dark;
+  --night: #03050b;
+  --navy: #08112c;
+  --cobalt: #244d9b;
+  --gold: #d6a43b;
+  --gold-dim: rgba(214, 164, 59, .35);
+  --ivory: #eee8d8;
+  --mist: #a7afbd;
+  font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--night); }
+body { color: var(--ivory); }
+button, a { color: inherit; font: inherit; }
+button { border: 0; }
+a { text-decoration: none; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.world, .canvas-shell { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.world::after { content: ""; position: fixed; z-index: 6; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 42%, rgba(1,2,5,.16) 0 17%, rgba(1,2,5,.38) 48%, rgba(1,2,5,.64) 100%); transition: opacity 1.05s cubic-bezier(.22,.72,.18,1); }
+.world.phase-idle::after, .world.is-exiting-archive::after { opacity: .72; }
+.canvas-shell { z-index: 1; }
+.canvas-shell canvas { display: block; touch-action: none; }
+.skip-link { position: fixed; z-index: 100; left: 1rem; top: 1rem; transform: translateY(-180%); padding: .7rem 1rem; background: var(--gold); color: var(--night); }
+.skip-link:focus { transform: none; }
+.sr-only { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+.hud {
+  position: fixed; z-index: 20; inset: 0 0 auto; height: 82px; padding: 0 max(26px, calc((100vw - 1700px) / 2));
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  border-bottom: 1px solid var(--gold-dim); background: linear-gradient(rgba(3,5,11,.82), rgba(3,5,11,.18));
+  pointer-events: none;
+}
+.hud > * { pointer-events: auto; }
+.hud::after { content: ""; position: absolute; left: 50%; bottom: -5px; width: min(36vw, 520px); height: 5px; transform: translateX(-50%); border-top: 1px solid rgba(214,164,59,.2); }
+.hud-left { justify-self: start; display: flex; align-items: center; gap: .7rem; }
+.crest { position: relative; width: 56px; height: 56px; display: grid; place-items: center; padding: 0; background: transparent; cursor: pointer; }
+.crest::before, .crest::after { content: ""; position: absolute; inset: 8px; border: 1px solid var(--gold); transform: rotate(45deg); }
+.crest::after { inset: 13px; border-color: rgba(214,164,59,.34); transform: rotate(45deg); }
+.crest__orbit { position: absolute; inset: 4px; border: 1px solid rgba(214,164,59,.22); border-radius: 50%; clip-path: polygon(0 0,100% 0,100% 42%,0 78%); transform: rotate(-19deg); }
+.crest__monogram { position: relative; z-index: 1; display: grid; place-items: center; width: 27px; height: 27px; color: #f7e8be; font: 500 .68rem/1 "Bodoni 72", Didot, serif; letter-spacing: .08em; text-indent: .08em; text-shadow: 0 0 12px rgba(214,164,59,.55); }
+.crest__monogram::before, .crest__monogram::after { content: ""; position: absolute; width: 3px; height: 3px; border: 1px solid var(--gold); transform: rotate(45deg); }
+.crest__monogram::before { top: -3px; }.crest__monogram::after { bottom: -3px; }
+.hud-tools { display: flex; align-items: center; gap: .38rem; }
+.hud-tools button { position: relative; width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(238,232,216,.2); background: rgba(3,5,11,.3); color: rgba(248,246,239,.9); cursor: pointer; transition: color .22s, border-color .22s, background .22s; }
+.hud-tools button:hover { color: #fff; border-color: rgba(214,164,59,.6); background: rgba(214,164,59,.08); }
+.hud-tools svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.45; stroke-linecap: round; stroke-linejoin: round; }
+.hud-tools svg path:first-child { fill: currentColor; stroke: none; }
+.hud-tools button.is-muted { color: rgba(167,175,189,.54); }
+.hud-tools button::after { content: attr(data-tip); position: absolute; top: calc(100% + 9px); left: 50%; padding: 4px 7px; transform: translate(-50%,-4px); opacity: 0; pointer-events: none; white-space: nowrap; border: 1px solid rgba(214,164,59,.2); background: rgba(3,5,11,.9); color: var(--ivory); font-size: .58rem; letter-spacing: .06em; transition: opacity .2s, transform .2s; }
+.hud-tools button:hover::after, .hud-tools button:focus-visible::after { opacity: 1; transform: translate(-50%,0); }
+.hud nav { display: flex; align-items: center; gap: 2.6rem; }
+.hud nav button, .hud-actions button, .hud-actions a { position: relative; padding: .5rem 0; background: transparent; color: rgba(248,246,239,.88); font-size: .78rem; font-weight: 650; letter-spacing: .025em; cursor: pointer; }
+.hud nav button::after { content: ""; position: absolute; left: 50%; right: 50%; bottom: 0; height: 1px; background: var(--gold); transition: left .25s, right .25s; }
+.hud nav button.is-active { color: #fffdf6; }
+.hud nav button.is-active::after, .hud nav button:hover::after { left: 0; right: 0; }
+.hud-actions { justify-self: end; display: flex; align-items: center; gap: .45rem; }
+.hud-actions button, .hud-actions a { min-height: 38px; padding: .55rem .82rem; border: 1px solid rgba(238,232,216,.18); background: rgba(3,5,11,.2); text-shadow: 0 2px 10px #000; transition: color .22s, border-color .22s, background .22s; }
+.hud-actions button:hover, .hud-actions a:hover { color: #fff; border-color: rgba(238,232,216,.5); background: rgba(238,232,216,.075); }
+
+.loading { position: fixed; z-index: 30; inset: 0; display: grid; place-content: center; gap: 1rem; background: var(--night); color: var(--mist); font-size: .8rem; letter-spacing: .12em; }
+.loading span { justify-self: center; width: 34px; height: 34px; border: 1px solid var(--gold-dim); border-top-color: var(--gold); transform: rotate(45deg); animation: loader 1.2s linear infinite; }
+@keyframes loader { to { transform: rotate(405deg); } }
+
+.intro { position: fixed; z-index: 8; inset: 82px 0 0; display: flex; justify-content: center; align-items: center; padding-bottom: 34vh; text-align: center; pointer-events: none; background: radial-gradient(circle at 50% 40%, transparent 0 18%, rgba(3,5,11,.16) 46%, rgba(3,5,11,.64) 100%); animation: reveal .9s ease both; }
+.intro__invitation { width: 100%; display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 12px 22px rgba(0,0,0,.74)); }
+.intro .depth-text { max-width: 92vw; }
+.intro .archive-title { filter: brightness(1.16) saturate(.92) drop-shadow(0 0 9px rgba(255,227,164,.38)) drop-shadow(0 0 30px rgba(190,125,28,.42)); }
+.intro .archive-title .depth-text__face { text-shadow: 0 0 2px rgba(255,250,225,.92), 0 0 12px rgba(233,183,84,.72), 0 0 34px rgba(184,112,22,.52), 0 18px 30px rgba(0,0,0,.82); animation: archive-jewel 3.8s ease-in-out infinite; }
+@keyframes archive-jewel { 50% { filter: brightness(1.15); text-shadow: 0 0 3px rgba(255,250,225,1), 0 0 18px rgba(241,195,105,.82), 0 0 46px rgba(184,112,22,.58), 0 18px 30px rgba(0,0,0,.82); } }
+@keyframes reveal { from { opacity: 0; } }
+
+.corridor-status { position: fixed; z-index: 7; left: max(30px, calc((100vw - 1700px) / 2)); bottom: 38px; pointer-events: auto; filter: drop-shadow(0 12px 20px rgba(0,0,0,.72)); animation: corridor-title-float 5.4s ease-in-out infinite; transition: opacity .35s ease; }
+.corridor-title { transform-origin: left center; }
+.corridor-title .depth-text__stage { transform-origin: 22% 64%; }
+.corridor-title .depth-text__face { font-family: "Bodoni 72", Didot, "Times New Roman", serif; letter-spacing: .015em; }
+.is-moving .corridor-status { opacity: .42; }
+@keyframes corridor-title-float { 50% { transform: translate3d(0,-8px,0); } }
+
+.door-identity { position: relative; isolation: isolate; width: 290px; padding: 8px 34px 10px; text-align: center; white-space: nowrap; pointer-events: none; filter: drop-shadow(0 8px 13px rgba(0,0,0,.5)); animation: door-title-drift 6s ease-in-out infinite; }
+.door-identity::before, .door-identity::after { content: ""; position: absolute; top: 46%; width: 54px; height: 1px; background: linear-gradient(90deg, transparent, rgba(224,179,91,.7)); box-shadow: 0 0 10px rgba(224,179,91,.2); }
+.door-identity::before { left: -10px; }
+.door-identity::after { right: -10px; transform: scaleX(-1); }
+.door-identity__aura { position: absolute; z-index: -1; inset: -20px -18px -18px; background: radial-gradient(ellipse at 50% 54%, color-mix(in srgb, var(--door-accent) 18%, transparent) 0, color-mix(in srgb, var(--door-accent) 7%, transparent) 36%, transparent 72%); filter: blur(10px); opacity: .88; }
+.door-identity__aura b { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #f4dfaa; box-shadow: 0 0 7px 2px color-mix(in srgb, var(--door-accent) 52%, transparent); opacity: .7; animation: door-mote 4.8s ease-in-out infinite; }
+.door-identity__aura b:nth-child(1) { left: 17%; top: 43%; }
+.door-identity__aura b:nth-child(2) { right: 14%; top: 58%; width: 1px; height: 1px; animation-delay: -1.7s; }
+.door-identity__aura b:nth-child(3) { left: 36%; bottom: 4%; width: 1px; height: 1px; animation-delay: -3.1s; }
+.door-identity span { display: block; margin-bottom: 7px; color: #d8a84c; font: 400 12px/1.2 "Songti SC", serif; letter-spacing: .2em; text-shadow: 0 2px 4px rgba(0,0,0,.72), 0 0 13px color-mix(in srgb, var(--door-accent) 28%, transparent); }
+.door-identity strong { display: block; color: var(--ivory); font: 400 18px/1.1 "Bodoni 72", Didot, serif; letter-spacing: .09em; }
+.door-identity strong::before { content: "◆"; display: block; margin-bottom: 5px; color: rgba(214,164,59,.72); font-size: 6px; line-height: 1; }
+@keyframes door-title-drift { 50% { transform: translateY(-5px); } }
+@keyframes door-mote { 50% { transform: translate3d(3px,-7px,0); opacity: .28; } }
+
+.room-board { position: relative; width: min(76vw, 1100px); max-height: 74vh; padding: clamp(24px, 3.2vw, 48px); overflow: auto; border: 1px solid rgba(214,164,59,.65); background: linear-gradient(140deg, rgba(9,17,39,.96), rgba(3,5,11,.97) 68%); color: var(--ivory); box-shadow: inset 0 0 0 7px rgba(3,5,11,.85), inset 0 0 0 8px rgba(214,164,59,.18), 0 14px 0 rgba(1,2,7,.86), 0 32px 36px rgba(0,0,0,.58), 0 75px 150px rgba(0,0,0,.86); clip-path: polygon(4% 0, 96% 0, 100% 8%, 100% 92%, 96% 100%, 4% 100%, 0 92%, 0 8%); text-align: left; pointer-events: auto; transform-style: preserve-3d; }
+.room-plasma { position: absolute; z-index: 0; inset: 0; overflow: hidden; opacity: .68; mix-blend-mode: screen; mask-image: radial-gradient(ellipse at 64% 34%, #000 0 16%, rgba(0,0,0,.82) 45%, transparent 86%); }
+.room-plasma::after { content: ""; position: absolute; inset: 0; background: linear-gradient(112deg, rgba(255,255,255,.025), transparent 28% 72%, rgba(214,164,59,.06)); box-shadow: inset 0 0 80px rgba(0,0,0,.72); pointer-events: none; }
+.room-board__content { position: relative; z-index: 1; transform: translateZ(18px); }
+.room-board::-webkit-scrollbar { width: 4px; }.room-board::-webkit-scrollbar-thumb { background: var(--gold); }
+.room-eyebrow { margin: 0 0 16px; color: var(--gold); font-size: .78rem; letter-spacing: .18em; }
+.room-board .depth-text { max-width: 100%; transform-origin: left center; }
+.room-intro { max-width: 40rem; margin: 2.2rem 0 0; font: 400 clamp(1.15rem,1.55vw,1.55rem)/1.55 "Songti SC", serif; color: #ddd8cb; }
+.room-body { max-width: 43rem; margin: 1rem 0 0; color: var(--mist); font-size: .92rem; line-height: 1.75; }
+.room-drift-wall { height: clamp(260px, 31vh, 360px); margin-top: 1.8rem; border-block: 1px solid rgba(214,164,59,.22); background: radial-gradient(ellipse at 50% 48%, rgba(21,31,62,.28), rgba(2,3,8,.72) 72%); overflow: hidden; }
+.room-exhibits { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; margin-top: 2.1rem; background: var(--gold-dim); border: 1px solid var(--gold-dim); }
+.room-exhibits--strengths { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.room-exhibits button { min-height: 140px; padding: 1.25rem; display: flex; flex-direction: column; align-items: flex-start; text-align: left; background: rgba(3,5,11,.94); color: var(--ivory); cursor: pointer; transition: background .25s, transform .25s; }
+.room-exhibits button:hover, .room-exhibits button.is-focused { z-index: 1; background: #142654; transform: translateY(-7px); box-shadow: 0 9px 0 var(--gold); }
+.room-exhibits strong { color: var(--gold); font: 400 clamp(1.1rem,1.8vw,1.7rem)/1 "Bodoni 72", Didot, serif; overflow: visible; }
+.room-exhibit-title { transform-origin: left center; filter: drop-shadow(0 9px 14px rgba(0,0,0,.52)); }
+.room-exhibit-title .depth-text__stage { transform-origin: 25% 65%; }
+.room-exhibits span { margin-top: auto; font-size: .8rem; line-height: 1.4; }
+.room-exhibits small { max-height: 0; margin-top: 0; overflow: hidden; opacity: 0; color: var(--mist); font-size: .7rem; line-height: 1.45; transition: max-height .3s, margin .3s, opacity .3s; }
+.room-exhibits button.is-focused small { max-height: 80px; margin-top: .75rem; opacity: 1; }
+.room-exit { margin-top: 1.4rem; padding: .7rem 0; background: transparent; color: var(--gold); font-size: .72rem; cursor: pointer; }
+
+.help-panel { position: fixed; z-index: 30; top: 96px; right: max(24px, calc((100vw - 1700px) / 2)); width: min(360px, calc(100vw - 48px)); padding: 2rem; border: 1px solid var(--gold-dim); background: rgba(3,5,11,.94); backdrop-filter: blur(16px); box-shadow: 0 30px 90px rgba(0,0,0,.65); }
+.help-panel > button { position: absolute; right: 12px; top: 10px; background: transparent; color: var(--gold); font-size: 1.5rem; cursor: pointer; }
+.help-panel > p { margin: 0 0 1.5rem; color: var(--gold); font: 400 1.5rem/1 "Bodoni 72", Didot, serif; }
+.help-panel dl { margin: 0; }.help-panel dl div { display: grid; grid-template-columns: 80px 1fr; gap: 1rem; padding: .8rem 0; border-top: 1px solid rgba(214,164,59,.18); }
+.help-panel dt { color: var(--ivory); }.help-panel dd { margin: 0; color: var(--mist); font-size: .8rem; }
+.contact-overlay { position: fixed; z-index: 50; inset: 0; display: grid; place-items: center; padding: 88px 24px 24px; background: radial-gradient(ellipse at 50% 42%, rgba(20,25,42,.42), rgba(1,2,6,.9)); backdrop-filter: blur(12px); animation: contact-veil .4s ease both; }
+.contact-dialog { position: relative; width: min(650px, 94vw); height: min(590px, calc(100vh - 112px)); display: grid; place-items: center; perspective: 1400px; }
+.contact-dialog__close { position: absolute; z-index: 10; top: 0; right: 0; width: 42px; height: 42px; border: 1px solid rgba(238,232,216,.34); background: rgba(3,5,11,.72); color: #fff; font: 300 1.45rem/1 Georgia, serif; cursor: pointer; }
+.contact-envelope { position: relative; width: min(610px, 90vw); height: min(500px, calc(100vh - 150px)); transform-style: preserve-3d; filter: drop-shadow(0 36px 55px rgba(0,0,0,.72)); }
+.contact-envelope__back { position: absolute; z-index: 1; inset: auto 0 0; height: 58%; border: 1px solid rgba(214,164,59,.62); background: linear-gradient(135deg, #130e0a, #05070d 58%, #1a1009); box-shadow: inset 0 0 0 7px #06070b, inset 0 0 0 8px rgba(214,164,59,.2); }
+.contact-letter { position: absolute; z-index: 4; left: 7%; bottom: 7%; width: 86%; min-height: 96%; padding: clamp(24px,4vw,42px); color: #19150e; background: linear-gradient(104deg, rgba(255,255,255,.16), transparent 22%), #e7deca; border: 1px solid #af8a47; box-shadow: 0 8px 24px rgba(0,0,0,.32), inset 0 0 55px rgba(104,75,31,.12); transform: translateY(38%); opacity: 0; animation: contact-letter-rise .9s .42s cubic-bezier(.18,.78,.2,1) forwards; }
+.contact-letter::before { content: ""; position: absolute; inset: 12px; border: 1px solid rgba(77,55,24,.24); pointer-events: none; }
+.contact-letter > p { margin: 0 0 10px; color: #80622c; font: 600 .68rem/1 "Bodoni 72", Didot, serif; letter-spacing: .22em; }
+.contact-letter h2 { margin: 0 0 24px; font: 600 clamp(1.8rem,4vw,2.65rem)/1 "Songti SC", serif; letter-spacing: .08em; }
+.contact-letter dl { margin: 0; border-top: 1px solid rgba(63,45,20,.26); }
+.contact-letter dl div { display: grid; grid-template-columns: 74px 1fr; gap: 16px; padding: 11px 0; border-bottom: 1px solid rgba(63,45,20,.18); }
+.contact-letter dt { color: #80622c; font-weight: 650; }.contact-letter dd { margin: 0; font-size: .84rem; word-break: break-word; }.contact-letter a { color: #19150e; text-decoration: underline; text-underline-offset: 3px; }
+.contact-letter__wechat { position: absolute; right: clamp(22px,4vw,42px); bottom: clamp(25px,3.5vw,38px); width: clamp(148px,22vw,184px); aspect-ratio: 888 / 1134; padding: 5px; overflow: hidden; border: 1px solid rgba(82,61,27,.34); background: #f7f4ec; box-shadow: 0 10px 24px rgba(36,22,6,.18), inset 0 0 0 1px rgba(255,255,255,.72); transform: rotate(1.2deg); }
+.contact-letter__wechat img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.contact-letter > small { position: absolute; left: clamp(24px,4vw,42px); bottom: clamp(30px,4vw,44px); max-width: 54%; color: #62553f; font: italic .7rem/1.6 Georgia, "Songti SC", serif; }
+.contact-envelope__front { position: absolute; z-index: 3; inset: auto 0 0; height: 58%; border: 1px solid rgba(214,164,59,.5); clip-path: polygon(0 0,50% 58%,100% 0,100% 100%,0 100%); background: linear-gradient(148deg, #100b08 0 48%, #07080d 49% 100%); box-shadow: inset 0 -12px 35px rgba(0,0,0,.58); pointer-events: none; }
+.contact-envelope__flap { position: absolute; z-index: 5; left: 0; bottom: 29%; width: 100%; height: 30%; transform-origin: 50% 100%; clip-path: polygon(0 0,100% 0,50% 100%); background: linear-gradient(#21150c,#09090d); border-top: 1px solid rgba(214,164,59,.58); animation: contact-flap-open .72s .08s cubic-bezier(.3,.8,.22,1) forwards; backface-visibility: hidden; }
+.contact-envelope__seal { position: absolute; z-index: 6; left: 50%; bottom: 42%; width: 48px; height: 48px; display: grid; place-items: center; translate: -50% 50%; border: 1px solid #e0b65f; border-radius: 50%; color: #f0cf88; background: radial-gradient(circle at 35% 30%, #9b6b2b, #3b210e 70%); font: 600 .7rem/1 "Bodoni 72", Didot, serif; letter-spacing: .08em; animation: contact-seal-break .35s .18s ease forwards; }
+@keyframes contact-veil { from { opacity: 0; } }
+@keyframes contact-flap-open { to { transform: rotateX(-178deg); z-index: 1; } }
+@keyframes contact-seal-break { to { opacity: 0; transform: scale(.72); } }
+@keyframes contact-letter-rise { to { opacity: 1; transform: translateY(-5%); } }
+.touch-controls { display: none; }
+
+.fallback { width: 100%; min-height: 100%; padding: 10vh 7vw; background-size: cover; background-position: center; }
+.fallback h1 { margin: 0; font: 400 clamp(3rem,8vw,8rem)/1 "Bodoni 72", Didot, serif; }.fallback > p { color: var(--mist); }
+.fallback > div { display: grid; gap: 1px; max-width: 900px; margin-top: 3rem; background: var(--gold-dim); }
+.fallback > div button { padding: 1.5rem; display: flex; justify-content: space-between; background: rgba(3,5,11,.9); color: var(--ivory); }.fallback > div span { color: var(--gold); }
+
+@media (max-width: 900px) {
+  .hud { height: 70px; padding-inline: 16px; grid-template-columns: auto 1fr; }
+  .hud nav { display: none; }.hud-actions { gap: .65rem; }.hud-actions button { font-size: .68rem; }.hud-actions a { padding: .5rem .7rem; font-size: .7rem; }
+  .intro { top: 70px; padding-bottom: 32vh; }
+  .intro .depth-text { transform: scale(.8); }
+  .corridor-status { left: 20px; bottom: 92px; }
+  .room-board { width: 90vw; max-height: 72vh; }
+  .room-drift-wall { height: 285px; margin-top: 1.35rem; }
+  .room-exhibits, .room-exhibits--strengths { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .room-exhibits button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .touch-controls { position: fixed; z-index: 20; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; gap: 10px; }
+  .touch-controls button { width: 52px; height: 48px; border: 1px solid var(--gold-dim); background: rgba(3,5,11,.8); color: var(--gold); backdrop-filter: blur(10px); }
+}
+
+@media (max-width: 560px) {
+  .crest { width: 50px; height: 50px; }
+  .hud-left { gap: .35rem; }
+  .hud-tools button { width: 29px; height: 29px; }
+  .intro .depth-text { transform: scale(.57); }
+  .room-board { width: 94vw; padding: 26px 22px; clip-path: polygon(6% 0,94% 0,100% 5%,100% 95%,94% 100%,6% 100%,0 95%,0 5%); }
+  .room-board .depth-text { transform: scale(.62); transform-origin: left center; margin-right: -38%; }
+  .room-intro { margin-top: 1.5rem; }.room-exhibits, .room-exhibits--strengths { grid-template-columns: 1fr; }
+  .room-exhibits button { min-height: 105px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .room-exhibits button:hover, .room-exhibits button.is-focused { transform: none; }
+}
