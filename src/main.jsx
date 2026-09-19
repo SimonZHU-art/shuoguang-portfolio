@@ -7,6 +7,8 @@ import InteractiveText from './InteractiveText'
 import { MODULES } from './portfolioData'
 import './styles.css'
 
+const asset = path => `${import.meta.env.BASE_URL}assets/${path}`
+
 const mod = (value, length) => ((value % length) + length) % length
 
 class SceneBoundary extends Component {
@@ -47,7 +49,7 @@ function createSoundEngine() {
 
 function Fallback({ onChoose }) {
   return (
-    <main className="fallback" style={{ backgroundImage: "linear-gradient(rgba(3,5,11,.42),rgba(3,5,11,.9)), url('/assets/dark-deco-triptych.jpg')" }}>
+    <main className="fallback" style={{ backgroundImage: `linear-gradient(rgba(3,5,11,.42),rgba(3,5,11,.9)), url('${asset('dark-deco-triptych.jpg')}')` }}>
       <h1>Shuoguang Zhu</h1>
       <p>你的浏览器暂时无法显示 3D 场景，仍可直接访问全部内容。</p>
       <div>{MODULES.map((item, index) => <button key={item.id} aria-label={`打开${item.label}`} onClick={() => onChoose(index)}><InteractiveText accent={item.sideColor}>{item.label}</InteractiveText><span><InteractiveText accent={item.sideColor}>{item.title}</InteractiveText></span></button>)}</div>
@@ -73,7 +75,7 @@ function ContactEnvelope({ onClose }) {
               <div><dt>微信</dt><dd>alddmxy0602wdt</dd></div>
             </dl>
             <div className="contact-letter__wechat">
-              <img src="/assets/wechat-qr-jujuon.jpg" alt="朱烁光的微信二维码" />
+              <img src={asset('wechat-qr-jujuon.jpg')} alt="朱烁光的微信二维码" />
             </div>
             <small>期待与你交换想法、作品与新的可能。</small>
           </article>

@@ -8,17 +8,18 @@ import InteractiveText from './InteractiveText'
 import Plasma from './Plasma'
 
 const CinematicEffects = lazy(() => import('./CinematicEffects'))
+const asset = path => `${import.meta.env.BASE_URL}assets/${path}`
 
 const GOLD = '#d6a43b'
 const DOOR_ASSETS = {
-  profile: '/assets/door-profile-stag.jpg',
-  projects: '/assets/door-projects-raven.jpg',
-  strengths: '/assets/door-strengths-lion.jpg',
+  profile: asset('door-profile-stag.jpg'),
+  projects: asset('door-projects-raven.jpg'),
+  strengths: asset('door-strengths-lion.jpg'),
 }
 const DRIFT_VISUALS = {
-  profile: ['/assets/door-profile-stag.jpg', '/assets/dark-deco-avatar-v3.jpg', '/assets/portfolio-triptych.jpg'],
-  projects: ['/assets/portfolio-triptych.jpg', '/assets/dark-deco-triptych.jpg', '/assets/door-projects-raven.jpg'],
-  strengths: ['/assets/door-strengths-lion.jpg', '/assets/dark-deco-butler-v2.jpg', '/assets/dark-deco-triptych.jpg', '/assets/door-profile-stag.jpg'],
+  profile: [asset('door-profile-stag.jpg'), asset('dark-deco-avatar-v3.jpg'), asset('portfolio-triptych.jpg')],
+  projects: [asset('portfolio-triptych.jpg'), asset('dark-deco-triptych.jpg'), asset('door-projects-raven.jpg')],
+  strengths: [asset('door-strengths-lion.jpg'), asset('dark-deco-butler-v2.jpg'), asset('dark-deco-triptych.jpg'), asset('door-profile-stag.jpg')],
 }
 
 function DecoPillar({ x, z = 0 }) {
@@ -156,7 +157,7 @@ function Avatar({ selected, moving, direction, reducedMotion, onSelect, phase })
   const material = useRef()
   const poseStart = useRef(0)
   const previousPhase = useRef(phase)
-  const idleTexture = useTexture('/assets/dark-deco-butler-v2.jpg')
+  const idleTexture = useTexture(asset('dark-deco-butler-v2.jpg'))
   const uniforms = useMemo(() => ({
     uIdleMap: { value: idleTexture },
     uQuarterMap: { value: idleTexture },
@@ -179,10 +180,10 @@ function Avatar({ selected, moving, direction, reducedMotion, onSelect, phase })
     let cancelled = false
     const loaded = []
     const targets = [
-      ['uQuarterMap', '/assets/dark-deco-butler-inspect-quarter-v1.jpg'],
-      ['uMidMap', '/assets/dark-deco-butler-inspect-mid-v1.jpg'],
-      ['uThreeQuarterMap', '/assets/dark-deco-butler-inspect-three-quarter-v1.jpg'],
-      ['uInspectMap', '/assets/dark-deco-butler-inspect-v1.jpg'],
+      ['uQuarterMap', asset('dark-deco-butler-inspect-quarter-v1.jpg')],
+      ['uMidMap', asset('dark-deco-butler-inspect-mid-v1.jpg')],
+      ['uThreeQuarterMap', asset('dark-deco-butler-inspect-three-quarter-v1.jpg')],
+      ['uInspectMap', asset('dark-deco-butler-inspect-v1.jpg')],
     ]
     const loader = new THREE.TextureLoader()
     targets.forEach(([uniform, url]) => loader.load(url, texture => {
@@ -262,7 +263,7 @@ function Hall({ module, phase, selected, focused, setFocused, leaveRoom, reduced
   const spot = useRef()
   const phaseStart = useRef(0)
   const previousPhase = useRef(phase)
-  const texture = useTexture('/assets/dark-deco-triptych.jpg')
+  const texture = useTexture(asset('dark-deco-triptych.jpg'))
   const map = useMemo(() => {
     const cloned = texture.clone()
     cloned.colorSpace = THREE.SRGBColorSpace
